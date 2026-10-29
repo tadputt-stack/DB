@@ -1,0 +1,41 @@
+# Cache and temporary files (required)
+/build/
+/.dart_tool/
+/.idea/
+/.vscode/
+*.env
+
+# Flutter & Dart build and cache artifacts
+build/
+**/build/
+.dart_tool/
+**/.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# IDE and Editor Cache & Settings
+.idea/
+**/.idea/
+.vscode/
+**/.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Android Studio & Gradle
+.gradle/
+**/.gradle/
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.history

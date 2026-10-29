@@ -1,0 +1,49 @@
+services:
+  # MySQL 8.4 Database Container
+  db:
+    image: mysql:8.4
+    container_name: onlysport_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: onlysport
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./seed_products.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+
+  # phpMyAdmin Web Interface
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: onlysport_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  # Apache PHP Web Container (OnlySport Admin Panel & REST API)
+  web:
+    build: .
+    container_name: onlysport_web
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_NAME: onlysport
+    ports:
+      - "8000:80"
+    volumes:
+      - ./admin:/var/www/html
+    depends_on:
+      - db
+
+volumes:
+  db_data:
