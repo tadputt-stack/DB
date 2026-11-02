@@ -32,6 +32,7 @@ $series_list_res = mysqli_query($conn, "SELECT series_id, series_name FROM serie
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>OnlySport - รายการสินค้าทั้งหมด</title>
   <link rel="stylesheet" href="style.css?v=<?php echo file_exists('style.css') ? filemtime('style.css') : time(); ?>">
 </head>
@@ -116,11 +117,15 @@ $series_list_res = mysqli_query($conn, "SELECT series_id, series_name FROM serie
                data-desc="<?php echo strtolower(htmlspecialchars($row['description'] ?? '')); ?>"
                data-series="<?php echo strtolower(htmlspecialchars($row['series_name'] ?? '')); ?>">
             <div class="menu-card-img-wrap">
-              <?php if (!empty($row['imageUrl'])): ?>
-                <img src="<?php echo htmlspecialchars($row['imageUrl']); ?>" 
+              <?php 
+                $clean_image_url = !empty($row['imageUrl']) ? str_replace('https://wsrv.nl/?url=', '', $row['imageUrl']) : '';
+              ?>
+              <?php if (!empty($clean_image_url)): ?>
+                <img src="<?php echo htmlspecialchars($clean_image_url); ?>" 
                      alt="<?php echo htmlspecialchars($row['name']); ?>" 
                      class="menu-card-img"
                      loading="lazy"
+                     referrerpolicy="no-referrer"
                      onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Cleat+Photo';">
               <?php else: ?>
                 <div class="menu-card-empty-img">ไม่มีรูปภาพสินค้า</div>
@@ -153,6 +158,10 @@ $series_list_res = mysqli_query($conn, "SELECT series_id, series_name FROM serie
               </div>
 
               <div class="menu-card-actions">
+                <a href="ratings.php?product_id=<?php echo $row['id']; ?>" 
+                   style="background-color: #f39c12; color: white; padding: 6px 10px; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                  ⭐ ดูรีวิว
+                </a>
                 <a href="edit.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-edit">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -225,11 +234,15 @@ $series_list_res = mysqli_query($conn, "SELECT series_id, series_name FROM serie
                   data-series="<?php echo strtolower(htmlspecialchars($row['series_name'] ?? '')); ?>">
                 <td><?php echo $i++; ?></td>
                 <td>
-                  <?php if (!empty($row['imageUrl'])): ?>
-                    <img src="<?php echo htmlspecialchars($row['imageUrl']); ?>" 
+                  <?php 
+                    $clean_image_url = !empty($row['imageUrl']) ? str_replace('https://wsrv.nl/?url=', '', $row['imageUrl']) : '';
+                  ?>
+                  <?php if (!empty($clean_image_url)): ?>
+                    <img src="<?php echo htmlspecialchars($clean_image_url); ?>" 
                          alt="<?php echo htmlspecialchars($row['name']); ?>" 
                          class="product-img"
                          loading="lazy"
+                         referrerpolicy="no-referrer"
                          onerror="this.onerror=null; this.src='https://via.placeholder.com/48x48?text=Cleat';">
                   <?php else: ?>
                     <div class="product-img-empty">No Img</div>
@@ -263,7 +276,11 @@ $series_list_res = mysqli_query($conn, "SELECT series_id, series_name FROM serie
                   <?php echo htmlspecialchars($row['description'] ?: '-'); ?>
                 </td>
                 <td style="text-align: center;">
-                  <div style="display: flex; gap: 6px; justify-content: center;">
+                  <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                    <a href="ratings.php?product_id=<?php echo $row['id']; ?>" 
+                       style="background-color: #f39c12; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">
+                       ⭐ ดูรีวิว
+                    </a>
                     <a href="edit.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-edit">แก้ไข</a>
                     <a href="delete.php?id=<?php echo $row['id']; ?>&from=menu" 
                        class="btn btn-sm btn-delete" 

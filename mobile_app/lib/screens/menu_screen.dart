@@ -6,10 +6,10 @@ import '../widgets/product_card.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({Key? key}) : super(key: key);
-
+/*เมนูสินค้าทั้งหมด*/
   @override
   Widget build(BuildContext context) {
-    const crimsonRed = Color(0xFFD32F2F);
+    const crimsonRed = Color.fromARGB(255, 211, 47, 47);
     final productProvider = context.watch<ProductProvider>();
     final filteredProducts = productProvider.filteredProducts;
     final categories = ['ทั้งหมด', 'Predator', 'F50', 'Copa'];
@@ -61,7 +61,6 @@ class MenuScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -69,7 +68,8 @@ class MenuScreen extends StatelessWidget {
                           .map(
                             (cat) => CategoryChip(
                               label: cat,
-                              isSelected: productProvider.selectedCategory == cat,
+                              isSelected:
+                                  productProvider.selectedCategory == cat,
                               onTap: () {
                                 productProvider.setSelectedCategory(cat);
                               },
@@ -78,9 +78,7 @@ class MenuScreen extends StatelessWidget {
                           .toList(),
                     ),
                   ),
-
                   const SizedBox(height: 16),
-
                   Text(
                     'พบสินค้าทั้งหมด (${filteredProducts.length} รายการ)',
                     style: const TextStyle(
@@ -89,9 +87,7 @@ class MenuScreen extends StatelessWidget {
                       color: Colors.black54,
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
                   Expanded(
                     child: productProvider.isLoading
                         ? const Center(
@@ -101,7 +97,8 @@ class MenuScreen extends StatelessWidget {
                             ? const Center(
                                 child: Text(
                                   'ไม่พบรายการสินค้า',
-                                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.grey),
                                 ),
                               )
                             : GridView.builder(
