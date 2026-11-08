@@ -49,8 +49,9 @@ $series_result = mysqli_query($conn, $series_query);
 </head>
 <body>
 
+<?php include "navbar.php"; ?>
+
 <div class="container">
-  <?php include "navbar.php"; ?>
 
   <?php if (!empty($error)): ?>
     <div class="alert alert-error">

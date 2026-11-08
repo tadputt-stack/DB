@@ -454,8 +454,9 @@ $end_record = min($offset + $shown_count, $filtered_count);
 </head>
 <body>
 
+<?php include "navbar.php"; ?>
+
 <div class="container">
-  <?php include "navbar.php"; ?>
 
   <!-- Alert Banner -->
   <?php if (!empty($msg)): ?>

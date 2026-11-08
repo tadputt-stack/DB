@@ -68,9 +68,10 @@ $top5_result = mysqli_query($conn, $top5_sql);
 </head>
 <body>
 
-<div class="container">
-  <?php include "navbar.php"; ?>
+<?php include "navbar.php"; ?>
 
+<div class="container">
+  <!-- Flash Alert Message -->
   <?php if (isset($_GET['msg']) && !empty($_GET['msg'])): ?>
     <div class="alert" id="alert-banner">
       <div class="alert-content">
@@ -83,6 +84,40 @@ $top5_result = mysqli_query($conn, $top5_sql);
     </div>
   <?php endif; ?>
 
+  <!-- Page Header Row -->
+  <div class="page-header-row">
+    <div>
+      <h1 class="page-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        Dashboard & ภาพรวมระบบ (Store Overview)
+      </h1>
+      <span class="page-subtitle" style="margin-left: 32px; display: block; margin-top: 2px;">
+        สรุปผลประกอบการ คลังสินค้า และ 5 อันดับสตั๊ดยอดนิยมประจำระบบ
+      </span>
+    </div>
+
+    <div class="page-actions-group">
+      <a href="menu.php" class="btn btn-outline btn-sm">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        จัดการสินค้า
+      </a>
+      <a href="add_new.php" class="btn btn-primary btn-sm">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+        </svg>
+        + เพิ่มสินค้าใหม่
+      </a>
+    </div>
+  </div>
+
+  <!-- Summary Stat Cards -->
   <div class="three-stat-grid">
     <div class="summary-stat-box">
       <div class="stat-icon-circle revenue-bg">
@@ -132,17 +167,21 @@ $top5_result = mysqli_query($conn, $top5_sql);
     </a>
   </div>
 
+  <!-- Best Sellers Table Card -->
   <div class="card">
     <div class="card-header">
       <div>
         <h2 class="card-title">
-          สินค้าขายดีอันดับ 1 - 5
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: #F59E0B;">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          สินค้าขายดีอันดับ 1 - 5 (Top 5 Best Sellers)
         </h2>
-        <span class="card-subtitle">จัดอันดับตามจำนวนคู่ที่ลูกค้าสั่งซื้อ</span>
+        <span class="card-subtitle">จัดอันดับตามจำนวนคู่ที่ลูกค้าทำรายการสั่งซื้อสำเร็จ</span>
       </div>
 
-      <a href="menu.php" class="btn btn-secondary btn-sm">
-        <span>ดูสินค้าทั้งหมด</span>
+      <a href="menu.php" class="btn btn-outline btn-sm">
+        <span>ดูแคตตาล็อกทั้งหมด</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
@@ -155,10 +194,10 @@ $top5_result = mysqli_query($conn, $top5_sql);
           <tr>
             <th style="width: 70px; text-align: center;">อันดับ</th>
             <th style="width: 70px; text-align: center;">รูปสินค้า</th>
-            <th>ชื่อสินค้า</th>
+            <th>ชื่อรองเท้าสตั๊ด</th>
             <th style="width: 140px;">ราคา</th>
             <th style="width: 180px; text-align: center;">คะแนน & สถานะ</th>
-            <th style="width: 150px; text-align: center;">จำนวนที่สั่งซื้อ</th>
+            <th style="width: 150px; text-align: center;">จำนวนสั่งซื้อ</th>
           </tr>
         </thead>
         <tbody>
@@ -175,34 +214,34 @@ $top5_result = mysqli_query($conn, $top5_sql);
                     $rank_class = 'rank-3';
                 }
                 $rating_info = get_bestseller_rating_status($rank, $top);
+                $clean_image_url = !empty($top['imageUrl']) ? str_replace('https://wsrv.nl/?url=', '', $top['imageUrl']) : '';
             ?>
               <tr>
                 <td style="text-align: center;">
-                  <span class="rank-pill <?php echo $rank_class; ?>">
-                    <?php echo $rank; ?>
+                  <span class="badge" style="width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; <?php echo ($rank === 1) ? 'background:#FEF3C7; color:#92400E; border:1px solid #FDE68A;' : (($rank === 2) ? 'background:#F1F5F9; color:#334155; border:1px solid #CBD5E1;' : (($rank === 3) ? 'background:#FFEDD5; color:#9A3412; border:1px solid #FED7AA;' : 'background:#F8FAFC; color:#64748B; border:1px solid #E2E8F0;')); ?>">
+                    #<?php echo $rank; ?>
                   </span>
                 </td>
                 <td style="text-align: center;">
-                  <?php if (!empty($top['imageUrl'])): ?>
-                    <img src="<?php echo htmlspecialchars($top['imageUrl']); ?>" 
+                  <?php if (!empty($clean_image_url)): ?>
+                    <img src="<?php echo htmlspecialchars($clean_image_url); ?>" 
                          alt="<?php echo htmlspecialchars($top['name']); ?>" 
-                         class="product-img" 
-                         style="margin: 0 auto;"
+                         class="product-thumb-img" 
+                         style="margin: 0 auto; width: 48px; height: 48px;"
                          loading="lazy"
+                         referrerpolicy="no-referrer"
                          onerror="this.onerror=null; this.src='https://via.placeholder.com/48x48?text=Cleat';">
                   <?php else: ?>
-                    <div class="product-img-empty" style="margin: 0 auto;">No Img</div>
+                    <div class="product-thumb-empty" style="margin: 0 auto; width: 48px; height: 48px;">No Img</div>
                   <?php endif; ?>
                 </td>
                 <td>
-                  <div class="menu-name-cell">
-                    <strong class="menu-name-text"><?php echo htmlspecialchars($top['name']); ?></strong>
-                    <?php if (!empty($top['ground_type'])): ?>
-                      <span class="badge badge-ground-fg">
-                        <?php echo htmlspecialchars($top['ground_type']); ?>
-                      </span>
-                    <?php endif; ?>
-                  </div>
+                  <strong style="color: var(--text-main); font-size: 13.5px;"><?php echo htmlspecialchars($top['name']); ?></strong>
+                  <?php if (!empty($top['ground_type'])): ?>
+                    <span class="badge badge-ground-fg" style="margin-left: 6px;">
+                      <?php echo htmlspecialchars($top['ground_type']); ?>
+                    </span>
+                  <?php endif; ?>
                 </td>
                 <td>
                   <span class="price-tag">฿<?php echo number_format($top['price'], 2); ?></span>
@@ -215,7 +254,7 @@ $top5_result = mysqli_query($conn, $top5_sql);
                       </svg>
                       <?php echo $rating_info['rating']; ?>
                     </span>
-                    <span class="status-pill <?php echo $rating_info['status_class']; ?>">
+                    <span class="stock-badge in-stock">
                       <?php echo $rating_info['status']; ?>
                     </span>
                   </div>
@@ -233,17 +272,8 @@ $top5_result = mysqli_query($conn, $top5_sql);
             ?>
           <?php else: ?>
             <tr>
-              <td colspan="6">
-                <div class="empty-state">
-                  <div class="empty-state-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <line x1="18" y1="20" x2="18" y2="10"></line>
-                      <line x1="12" y1="20" x2="12" y2="4"></line>
-                      <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
-                  </div>
-                  <p>ยังไม่มีข้อมูลการสั่งซื้อสินค้า</p>
-                </div>
+              <td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                ยังไม่มีข้อมูลการสั่งซื้อสินค้า
               </td>
             </tr>
           <?php endif; ?>
@@ -252,36 +282,40 @@ $top5_result = mysqli_query($conn, $top5_sql);
     </div>
   </div>
 
+  <!-- Quick System Shortcuts Card -->
   <div class="card">
     <div class="card-header">
       <h2 class="card-title">
-        ทางลัดการจัดการระบบ
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        ทางลัดการจัดการระบบ (Quick Actions)
       </h2>
     </div>
     <div class="card-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
-      <a href="menu.php" class="btn btn-secondary" style="padding: 12px;">
+      <a href="menu.php" class="btn btn-outline" style="padding: 12px; justify-content: flex-start;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
-        ดูรายการสินค้าทั้งหมด
+        จัดการรายการสินค้าทั้งหมด
       </a>
-      <a href="add_new.php" class="btn btn-primary" style="padding: 12px;">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <a href="add_new.php" class="btn btn-primary" style="padding: 12px; justify-content: flex-start;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
         </svg>
-        เพิ่มสินค้าใหม่
+        เพิ่มสินค้าสตั๊ดใหม่
       </a>
-      <a href="manage.php" class="btn btn-secondary" style="padding: 12px;">
+      <a href="orders.php" class="btn btn-outline" style="padding: 12px; justify-content: flex-start;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-        </svg>
-        จัดการสินค้า (แก้ไข / ลบ)
-      </a>
-      <a href="orders.php" class="btn btn-secondary" style="padding: 12px;">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"></path>
         </svg>
         จัดการคำสั่งซื้อลูกค้า
+      </a>
+      <a href="ratings.php" class="btn btn-outline" style="padding: 12px; justify-content: flex-start;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        ดูรีวิวและความพึงพอใจ
       </a>
     </div>
   </div>

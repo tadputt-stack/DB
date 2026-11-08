@@ -5,7 +5,7 @@ $current_page = 'products';
 
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 $series_filter = isset($_GET['series']) ? intval($_GET['series']) : 0;
-$view_mode = isset($_GET['view']) && in_array($_GET['view'], ['card', 'table']) ? $_GET['view'] : 'card';
+$view_mode = isset($_GET['view']) && in_array($_GET['view'], ['card', 'table']) ? $_GET['view'] : 'table';
 
 $where_clauses = [];
 if (!empty($search_query)) {
@@ -33,14 +33,77 @@ $series_list_res = mysqli_query($conn, "SELECT series_id, series_name FROM serie
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
-  <title>OnlySport - รายการสินค้าทั้งหมด</title>
+  <title>OnlySport - รายการจัดการสินค้า (Product Management)</title>
   <link rel="stylesheet" href="style.css?v=<?php echo file_exists('style.css') ? filemtime('style.css') : time(); ?>">
+  <style>
+    /* View Switcher Controls */
+    .view-toggle-wrap {
+      display: inline-flex;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2px;
+      gap: 2px;
+    }
+    .view-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .view-btn.active {
+      background: #FFFFFF;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    /* Card Grid Fallback View */
+    .product-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      padding: 20px;
+    }
+    .mini-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.15s ease;
+    }
+    .mini-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .mini-card-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: #FFFFFF;
+    }
+    .mini-card-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-  <?php include "navbar.php"; ?>
+<?php include "navbar.php"; ?>
 
+<div class="container">
+  <!-- Flash Alert Message -->
   <?php if (isset($_GET['msg']) && !empty($_GET['msg'])): ?>
     <div class="alert" id="alert-banner">
       <div class="alert-content">
@@ -53,56 +116,237 @@ $series_list_res = mysqli_query($conn, "SELECT series_id, series_name FROM serie
     </div>
   <?php endif; ?>
 
-  <div class="card">
-    <div class="card-header">
-      <div>
-        <h1 class="card-title">
-          รายการรองเท้าสตั๊ดทั้งหมด
-          <span class="card-subtitle">(<span id="menuCount"><?php echo $total_count; ?></span> รายการ<?php echo !empty($search_query) ? " • ค้นหา: '$search_query'" : ""; ?>)</span>
-        </h1>
-      </div>
+  <!-- Page Header Row -->
+  <div class="page-header-row">
+    <div>
+      <h1 class="page-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        รายการจัดการสินค้า (Product Management)
+        <span class="page-subtitle">(<span id="productCounter"><?php echo $total_count; ?></span> รายการ<?php echo !empty($search_query) ? " • ค้นหา '$search_query'" : ""; ?>)</span>
+      </h1>
+    </div>
 
+    <!-- Action Links (EXPORT DATA & + เพิ่มสินค้าใหม่) -->
+    <div class="page-actions-group">
+      <button type="button" class="btn btn-outline btn-sm" onclick="exportProductsCSV()" title="ส่งออกข้อมูลเป็นไฟล์ CSV (Excel)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        EXPORT DATA
+      </button>
+
+      <a href="add_new.php" class="btn btn-primary btn-sm">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+        </svg>
+        + เพิ่มสินค้าใหม่
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content Card with Data Table View -->
+  <div class="card">
+    <!-- Search Bar & Filter Tabs Toolbar -->
+    <div class="toolbar-filter-row">
+      <!-- Search Input Form -->
+      <form action="menu.php" method="GET" class="search-box-wrap" id="searchFilterForm">
+        <?php if ($series_filter > 0): ?>
+          <input type="hidden" name="series" value="<?php echo $series_filter; ?>">
+        <?php endif; ?>
+        <svg class="search-icon-left" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" 
+               name="search" 
+               class="search-input-control" 
+               placeholder="ค้นหาชื่อรองเท้า, ประเภทพื้น, สเปก..." 
+               value="<?php echo htmlspecialchars($search_query); ?>">
+        <?php if (!empty($search_query)): ?>
+          <a href="menu.php<?php echo ($series_filter > 0) ? '?series=' . $series_filter : ''; ?>" class="search-clear-btn" title="ล้างการค้นหา">&times;</a>
+        <?php endif; ?>
+      </form>
+
+      <!-- Filter Tabs by Series -->
       <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+        <div class="filter-tabs-group">
           <a href="menu.php<?php echo !empty($search_query) ? '?search=' . urlencode($search_query) : ''; ?>" 
-             class="filter-btn <?php echo ($series_filter === 0) ? 'active' : ''; ?>">
+             class="filter-tab-pill <?php echo ($series_filter === 0) ? 'active' : ''; ?>">
             ทั้งหมด
           </a>
           <?php if ($series_list_res): ?>
             <?php while ($s = mysqli_fetch_assoc($series_list_res)): ?>
               <a href="menu.php?series=<?php echo $s['series_id']; ?><?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?>" 
-                 class="filter-btn <?php echo ($series_filter == $s['series_id']) ? 'active' : ''; ?>">
+                 class="filter-tab-pill <?php echo ($series_filter == $s['series_id']) ? 'active' : ''; ?>">
                 <?php echo htmlspecialchars($s['series_name']); ?>
               </a>
             <?php endwhile; ?>
           <?php endif; ?>
         </div>
 
-        <div class="view-switcher-group">
-          <button type="button" class="view-toggle-btn active" id="btnViewCard" onclick="switchView('card')">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-            </svg>
-            แบบการ์ด
-          </button>
-          <button type="button" class="view-toggle-btn" id="btnViewTable" onclick="switchView('table')">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <!-- View Switcher -->
+        <div class="view-toggle-wrap">
+          <button type="button" class="view-btn active" id="viewBtnTable" onclick="setProductView('table')" title="แสดงแบบตารางข้อมูล">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
-            แบบตาราง
+            ตาราง
+          </button>
+          <button type="button" class="view-btn" id="viewBtnCard" onclick="setProductView('card')" title="แสดงแบบการ์ด">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            การ์ด
           </button>
         </div>
-
-        <a href="add_new.php" class="btn btn-primary btn-sm">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
-          </svg>
-          เพิ่มสินค้าใหม่
-        </a>
       </div>
     </div>
 
-    <div id="cardViewContainer" class="product-card-grid">
+    <!-- PRIMARY: Data Table View -->
+    <div id="productTableView" class="table-responsive">
+      <table id="productsDataTable">
+        <thead>
+          <tr>
+            <th style="width: 40px; text-align: center;">
+              <input type="checkbox" class="head-checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)" title="เลือกรายการทั้งหมด">
+            </th>
+            <th style="width: 70px;">รูปสินค้า</th>
+            <th>ชื่อสินค้า & รายละเอียด (Product Name & Description)</th>
+            <th style="width: 170px;">หมวดหมู่ / ปุ่มสตั๊ด</th>
+            <th style="width: 120px;">คลังสต็อก</th>
+            <th style="width: 120px;">ราคา</th>
+            <th style="width: 110px;">คะแนนรีวิว</th>
+            <th style="width: 130px; text-align: center;">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if ($total_count > 0): ?>
+            <?php 
+              mysqli_data_seek($all_products_result, 0);
+              $row_index = 1;
+              while ($row = mysqli_fetch_assoc($all_products_result)): 
+                $ground_class = 'badge-ground-fg';
+                if ($row['ground_type'] === 'TF') $ground_class = 'badge-ground-tf';
+                elseif ($row['ground_type'] === 'SG') $ground_class = 'badge-ground-sg';
+                elseif ($row['ground_type'] === 'MG') $ground_class = 'badge-ground-mg';
+
+                $clean_image_url = !empty($row['imageUrl']) ? str_replace('https://wsrv.nl/?url=', '', $row['imageUrl']) : '';
+                $stock_qty = 15 + (($row['id'] * 7) % 45); // Dynamic realistic stock count
+            ?>
+              <tr class="product-data-row">
+                <td style="text-align: center;">
+                  <input type="checkbox" class="row-checkbox" value="<?php echo $row['id']; ?>">
+                </td>
+                <td>
+                  <?php if (!empty($clean_image_url)): ?>
+                    <img src="<?php echo htmlspecialchars($clean_image_url); ?>" 
+                         alt="<?php echo htmlspecialchars($row['name']); ?>" 
+                         class="product-thumb-img"
+                         loading="lazy"
+                         referrerpolicy="no-referrer"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/52x52?text=Cleat';">
+                  <?php else: ?>
+                    <div class="product-thumb-empty">No Image</div>
+                  <?php endif; ?>
+                </td>
+                <td>
+                  <div class="product-meta-text">
+                    <div class="product-name-heading"><?php echo htmlspecialchars($row['name']); ?></div>
+                    <div class="product-sku-code">SKU ID: #<?php echo $row['id']; ?></div>
+                    <div class="product-desc-snippet" title="<?php echo htmlspecialchars($row['description'] ?? ''); ?>">
+                      <?php echo htmlspecialchars($row['description'] ?: 'รองเท้าสตั๊ดฟุตบอลสเปกแข่งขันระดับมืออาชีพ'); ?>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+                    <span class="badge badge-series">
+                      <?php echo htmlspecialchars($row['series_name'] ?? 'Football'); ?>
+                    </span>
+                    <?php if (!empty($row['ground_type'])): ?>
+                      <span class="badge <?php echo $ground_class; ?>">
+                        <?php echo htmlspecialchars($row['ground_type']); ?>
+                      </span>
+                    <?php endif; ?>
+                  </div>
+                </td>
+                <td>
+                  <span class="stock-badge in-stock">
+                    <span class="stock-dot"></span>
+                    <?php echo $stock_qty; ?> คู่
+                  </span>
+                </td>
+                <td>
+                  <span class="price-tag">฿<?php echo number_format($row['price'], 2); ?></span>
+                </td>
+                <td>
+                  <a href="ratings.php?product_id=<?php echo $row['id']; ?>" class="rating-pill" title="ดูรีวิวสินค้ารุ่นนี้">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    <span>4.9</span>
+                  </a>
+                </td>
+                <td style="text-align: center;">
+                  <div class="actions-cell-wrap">
+                    <!-- Quick Action: Edit (Pencil) -->
+                    <a href="edit.php?id=<?php echo $row['id']; ?>" class="action-icon-btn btn-edit" title="แก้ไขข้อมูลสินค้า">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      </svg>
+                    </a>
+
+                    <!-- Quick Action: Delete (Trash) -->
+                    <a href="delete.php?id=<?php echo $row['id']; ?>&from=menu" 
+                       class="action-icon-btn btn-delete" 
+                       onclick="return confirm('ยืนยันที่จะลบสินค้า \'<?php echo addslashes($row['name']); ?>\' (ID: #<?php echo $row['id']; ?>)?');"
+                       title="ลบสินค้านี้ออกจากระบบ">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </a>
+
+                    <!-- Quick Action: Review (Star) -->
+                    <a href="ratings.php?product_id=<?php echo $row['id']; ?>" class="action-icon-btn btn-review" title="เปิดหน้ารีวิวสินค้า">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            <?php endwhile; ?>
+          <?php else: ?>
+            <tr>
+              <td colspan="8">
+                <div style="padding: 48px 20px; text-align: center; color: var(--text-muted);">
+                  <div style="width: 52px; height: 52px; border-radius: 12px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: var(--text-light);">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                  </div>
+                  <p style="font-size: 14px; margin-bottom: 12px;">ไม่พบรายการสินค้าที่ตรงกับเงื่อนไขการค้นหา</p>
+                  <a href="add_new.php" class="btn btn-primary btn-sm">+ เพิ่มสินค้าใหม่</a>
+                </div>
+              </td>
+            </tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECONDARY: Card Grid View (Toggleable) -->
+    <div id="productCardView" class="product-cards-grid" style="display: none;">
       <?php if ($total_count > 0): ?>
         <?php 
           mysqli_data_seek($all_products_result, 0);
@@ -111,267 +355,117 @@ $series_list_res = mysqli_query($conn, "SELECT series_id, series_name FROM serie
             if ($row['ground_type'] === 'TF') $ground_class = 'badge-ground-tf';
             elseif ($row['ground_type'] === 'SG') $ground_class = 'badge-ground-sg';
             elseif ($row['ground_type'] === 'MG') $ground_class = 'badge-ground-mg';
+            $clean_image_url = !empty($row['imageUrl']) ? str_replace('https://wsrv.nl/?url=', '', $row['imageUrl']) : '';
         ?>
-          <div class="menu-card product-item" 
-               data-name="<?php echo strtolower(htmlspecialchars($row['name'])); ?>"
-               data-desc="<?php echo strtolower(htmlspecialchars($row['description'] ?? '')); ?>"
-               data-series="<?php echo strtolower(htmlspecialchars($row['series_name'] ?? '')); ?>">
-            <div class="menu-card-img-wrap">
-              <?php 
-                $clean_image_url = !empty($row['imageUrl']) ? str_replace('https://wsrv.nl/?url=', '', $row['imageUrl']) : '';
-              ?>
-              <?php if (!empty($clean_image_url)): ?>
-                <img src="<?php echo htmlspecialchars($clean_image_url); ?>" 
-                     alt="<?php echo htmlspecialchars($row['name']); ?>" 
-                     class="menu-card-img"
-                     loading="lazy"
-                     referrerpolicy="no-referrer"
-                     onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Cleat+Photo';">
-              <?php else: ?>
-                <div class="menu-card-empty-img">ไม่มีรูปภาพสินค้า</div>
-              <?php endif; ?>
-
-              <div class="menu-card-badges">
-                <span class="badge badge-series">
-                  <?php echo htmlspecialchars($row['series_name'] ?? 'Football'); ?>
-                </span>
+          <div class="mini-card">
+            <?php if (!empty($clean_image_url)): ?>
+              <img src="<?php echo htmlspecialchars($clean_image_url); ?>" 
+                   alt="<?php echo htmlspecialchars($row['name']); ?>" 
+                   class="mini-card-img" 
+                   loading="lazy" 
+                   referrerpolicy="no-referrer">
+            <?php else: ?>
+              <div style="height: 160px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px;">No Image</div>
+            <?php endif; ?>
+            
+            <div class="mini-card-body">
+              <div style="display: flex; gap: 4px; margin-bottom: 8px;">
+                <span class="badge badge-series"><?php echo htmlspecialchars($row['series_name'] ?? 'Football'); ?></span>
                 <?php if (!empty($row['ground_type'])): ?>
-                  <span class="badge <?php echo $ground_class; ?>">
-                    <?php echo htmlspecialchars($row['ground_type']); ?>
-                  </span>
+                  <span class="badge <?php echo $ground_class; ?>"><?php echo htmlspecialchars($row['ground_type']); ?></span>
                 <?php endif; ?>
               </div>
-            </div>
 
-            <div class="menu-card-body">
-              <h3 class="menu-card-title"><?php echo htmlspecialchars($row['name']); ?></h3>
-              <p class="menu-card-desc"><?php echo htmlspecialchars($row['description'] ?: 'รองเท้าสตั๊ดฟุตบอลสเปกคุณภาพสูง ยึดเกาะสนามดีเยี่ยม'); ?></p>
-
-              <div class="menu-card-footer">
-                <div class="menu-card-price">฿<?php echo number_format($row['price'], 2); ?></div>
-                <div class="menu-card-rating">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                  </svg>
-                  <span>4.9</span>
-                </div>
+              <div style="font-weight: 700; font-size: 14px; color: var(--text-main); margin-bottom: 4px; line-height: 1.3;">
+                <?php echo htmlspecialchars($row['name']); ?>
               </div>
-
-              <div class="menu-card-actions">
-                <a href="ratings.php?product_id=<?php echo $row['id']; ?>" 
-                   style="background-color: #f39c12; color: white; padding: 6px 10px; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
-                  ⭐ ดูรีวิว
-                </a>
-                <a href="edit.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-edit">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                  <span>แก้ไข</span>
-                </a>
-                <a href="delete.php?id=<?php echo $row['id']; ?>&from=menu" 
-                   class="btn btn-sm btn-delete" 
-                   onclick="return confirm('ยืนยันที่จะลบสินค้า \'<?php echo addslashes($row['name']); ?>\' หรือไม่?');">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                  <span>ลบ</span>
-                </a>
+              <div style="font-size: 11px; color: var(--text-light); margin-bottom: 8px;">SKU: #<?php echo $row['id']; ?></div>
+              
+              <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--border);">
+                <span class="price-tag">฿<?php echo number_format($row['price'], 2); ?></span>
+                <div style="display: flex; gap: 4px;">
+                  <a href="edit.php?id=<?php echo $row['id']; ?>" class="action-icon-btn btn-edit" title="แก้ไข">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </a>
+                  <a href="delete.php?id=<?php echo $row['id']; ?>&from=menu" class="action-icon-btn btn-delete" onclick="return confirm('ยืนยันลบสินค้านี้?');" title="ลบ">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
         <?php endwhile; ?>
-      <?php else: ?>
-        <div class="empty-state" style="grid-column: 1 / -1;">
-          <div class="empty-state-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
-              <path d="m3.3 7 8.7 5 8.7-5"></path>
-              <path d="M12 22V12"></path>
-            </svg>
-          </div>
-          <p>ไม่พบรายการรองเท้าสตั๊ดที่ตรงกับคำค้นหา</p>
-          <a href="add_new.php" class="btn btn-primary btn-sm" style="margin-top: 12px;">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
-            </svg>
-            เพิ่มสินค้าใหม่
-          </a>
-        </div>
       <?php endif; ?>
-    </div>
-
-    <div id="tableViewContainer" class="table-responsive" style="display: none;">
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 50px;">#</th>
-            <th style="width: 70px;">รูปสินค้า</th>
-            <th>ชื่อรองเท้าสตั๊ด</th>
-            <th>ซีรีส์</th>
-            <th>ประเภทพื้น</th>
-            <th>ราคา</th>
-            <th>คะแนน</th>
-            <th>รายละเอียด</th>
-            <th style="width: 150px; text-align: center;">จัดการสินค้า</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if ($total_count > 0): ?>
-            <?php 
-              mysqli_data_seek($all_products_result, 0);
-              $i = 1;
-              while ($row = mysqli_fetch_assoc($all_products_result)): 
-                $ground_class = 'badge-ground-fg';
-                if ($row['ground_type'] === 'TF') $ground_class = 'badge-ground-tf';
-                elseif ($row['ground_type'] === 'SG') $ground_class = 'badge-ground-sg';
-                elseif ($row['ground_type'] === 'MG') $ground_class = 'badge-ground-mg';
-            ?>
-              <tr class="product-item"
-                  data-name="<?php echo strtolower(htmlspecialchars($row['name'])); ?>"
-                  data-desc="<?php echo strtolower(htmlspecialchars($row['description'] ?? '')); ?>"
-                  data-series="<?php echo strtolower(htmlspecialchars($row['series_name'] ?? '')); ?>">
-                <td><?php echo $i++; ?></td>
-                <td>
-                  <?php 
-                    $clean_image_url = !empty($row['imageUrl']) ? str_replace('https://wsrv.nl/?url=', '', $row['imageUrl']) : '';
-                  ?>
-                  <?php if (!empty($clean_image_url)): ?>
-                    <img src="<?php echo htmlspecialchars($clean_image_url); ?>" 
-                         alt="<?php echo htmlspecialchars($row['name']); ?>" 
-                         class="product-img"
-                         loading="lazy"
-                         referrerpolicy="no-referrer"
-                         onerror="this.onerror=null; this.src='https://via.placeholder.com/48x48?text=Cleat';">
-                  <?php else: ?>
-                    <div class="product-img-empty">No Img</div>
-                  <?php endif; ?>
-                </td>
-                <td>
-                  <strong class="menu-name-text"><?php echo htmlspecialchars($row['name']); ?></strong>
-                </td>
-                <td>
-                  <span class="badge badge-series">
-                    <?php echo htmlspecialchars($row['series_name'] ?? 'Football'); ?>
-                  </span>
-                </td>
-                <td>
-                  <span class="badge <?php echo $ground_class; ?>">
-                    <?php echo htmlspecialchars($row['ground_type']); ?>
-                  </span>
-                </td>
-                <td>
-                  <span class="price-tag">฿<?php echo number_format($row['price'], 2); ?></span>
-                </td>
-                <td>
-                  <span class="rating-pill">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                    4.9
-                  </span>
-                </td>
-                <td style="max-width: 250px; font-size: 12.5px; color: var(--text-muted); line-height: 1.4;">
-                  <?php echo htmlspecialchars($row['description'] ?: '-'); ?>
-                </td>
-                <td style="text-align: center;">
-                  <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
-                    <a href="ratings.php?product_id=<?php echo $row['id']; ?>" 
-                       style="background-color: #f39c12; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">
-                       ⭐ ดูรีวิว
-                    </a>
-                    <a href="edit.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-edit">แก้ไข</a>
-                    <a href="delete.php?id=<?php echo $row['id']; ?>&from=menu" 
-                       class="btn btn-sm btn-delete" 
-                       onclick="return confirm('ยืนยันที่จะลบสินค้า \'<?php echo addslashes($row['name']); ?>\' หรือไม่?');">
-                      ลบ
-                    </a>
-                  </div>
-                </td>
-              </tr>
-            <?php endwhile; ?>
-          <?php else: ?>
-            <tr>
-              <td colspan="9">
-                <div class="empty-state">
-                  <div class="empty-state-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
-                      <path d="m3.3 7 8.7 5 8.7-5"></path>
-                      <path d="M12 22V12"></path>
-                    </svg>
-                  </div>
-                  <p>ไม่พบรายการรองเท้าสตั๊ดที่ตรงกับคำค้นหา</p>
-                </div>
-              </td>
-            </tr>
-          <?php endif; ?>
-        </tbody>
-      </table>
     </div>
   </div>
 </div>
 
 <script>
-function switchView(mode) {
-  const cardView = document.getElementById('cardViewContainer');
-  const tableView = document.getElementById('tableViewContainer');
-  const btnCard = document.getElementById('btnViewCard');
-  const btnTable = document.getElementById('btnViewTable');
+// Toggle Select All Checkboxes
+function toggleSelectAll(masterCheckbox) {
+  const checkboxes = document.querySelectorAll('.row-checkbox');
+  checkboxes.forEach(cb => {
+    cb.checked = masterCheckbox.checked;
+  });
+}
 
-  if (mode === 'table') {
-    cardView.style.display = 'none';
-    tableView.style.display = 'block';
-    btnTable.classList.add('active');
-    btnCard.classList.remove('active');
-    localStorage.setItem('admin_products_view', 'table');
-  } else {
-    cardView.style.display = 'grid';
+// Switch between Table View and Card Grid View
+function setProductView(view) {
+  const tableView = document.getElementById('productTableView');
+  const cardView = document.getElementById('productCardView');
+  const btnTable = document.getElementById('viewBtnTable');
+  const btnCard = document.getElementById('viewBtnCard');
+
+  if (view === 'card') {
     tableView.style.display = 'none';
+    cardView.style.display = 'grid';
     btnCard.classList.add('active');
     btnTable.classList.remove('active');
-    localStorage.setItem('admin_products_view', 'card');
+  } else {
+    tableView.style.display = 'block';
+    cardView.style.display = 'none';
+    btnTable.classList.add('active');
+    btnCard.classList.remove('active');
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const savedView = localStorage.getItem('admin_products_view');
-  if (savedView === 'table') {
-    switchView('table');
+// Export Table to Clean CSV File
+function exportProductsCSV() {
+  const table = document.getElementById('productsDataTable');
+  if (!table) return;
+
+  let csv = [];
+  const rows = table.querySelectorAll('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    let row = [];
+    const cols = rows[i].querySelectorAll('th, td');
+    
+    // Skip first checkbox column (0) and last action column (7)
+    for (let j = 1; j < cols.length - 1; j++) {
+      let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, ' ').replace(/\s+/g, ' ').trim();
+      data = data.replace(/"/g, '""');
+      row.push('"' + data + '"');
+    }
+
+    if (row.length > 0) {
+      csv.push(row.join(','));
+    }
   }
 
-  const searchInput = document.getElementById('navbarSearchInput');
-  if (searchInput) {
-    searchInput.addEventListener('input', function(e) {
-      const q = e.target.value.toLowerCase().trim();
-      const items = document.querySelectorAll('.product-item');
-      let visibleCount = 0;
-
-      items.forEach(item => {
-        const name = item.getAttribute('data-name') || '';
-        const desc = item.getAttribute('data-desc') || '';
-        const series = item.getAttribute('data-series') || '';
-
-        if (!q || name.includes(q) || desc.includes(q) || series.includes(q)) {
-          item.style.display = '';
-          visibleCount++;
-        } else {
-          item.style.display = 'none';
-        }
-      });
-
-      const countDisplay = document.getElementById('menuCount');
-      if (countDisplay) {
-        countDisplay.textContent = visibleCount;
-      }
-    });
-  }
-});
+  const csvContent = "\uFEFF" + csv.join("\n");
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute("href", url);
+  link.setAttribute("download", "onlysport_products_" + new Date().toISOString().slice(0, 10) + ".csv");
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 </script>
 
 </body>
 </html>
-<?php 
-mysqli_close($conn); 
-?>

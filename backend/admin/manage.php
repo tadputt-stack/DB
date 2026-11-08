@@ -37,8 +37,9 @@ $series_list_res = mysqli_query($conn, "SELECT series_id, series_name FROM serie
 </head>
 <body>
 
+<?php include "navbar.php"; ?>
+
 <div class="container">
-  <?php include "navbar.php"; ?>
 
   <?php if (isset($_GET['msg']) && !empty($_GET['msg'])): ?>
     <div class="alert" id="alert-banner">

@@ -10,10 +10,16 @@ if (isset($conn) && $conn) {
     }
 }
 ?>
-<header class="reference-navbar">
-  <a href="index.php" class="brand-section">
-    <div class="brand-logo-text">
-      <span class="brand-icon-circle">
+<!-- Top Header Bar (Original Brand RED Palette #D90429 / #E5383B) -->
+<header class="top-header-bar">
+  <div class="header-left">
+    <button type="button" class="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+    <a href="index.php" class="header-brand">
+      <span class="header-brand-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <path d="m4.93 4.93 4.24 4.24"></path>
@@ -23,77 +29,93 @@ if (isset($conn) && $conn) {
           <circle cx="12" cy="12" r="4"></circle>
         </svg>
       </span>
-      <span class="brand-name">
-        Only<span class="brand-accent">Sport</span>
-        <span class="brand-tagline">Cleats Store Manager</span>
-      </span>
+      <div class="header-brand-text">
+        <span class="brand-title">Only<span class="brand-accent-red">Sport</span></span>
+        <span class="brand-sub">Back Office Suite</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="header-right">
+    <div class="header-user-badge">
+      <div class="header-avatar-circle">OS</div>
+      <div class="header-user-meta">
+        <span class="header-admin-name">Admin OnlySport</span>
+        <span class="header-admin-role">Super Administrator</span>
+      </div>
     </div>
-  </a>
+  </div>
+</header>
 
-  <nav class="nav-links-group">
-    <a href="menu.php" class="nav-item-btn <?php echo ($current_page === 'menu' || $current_page === 'products') ? 'active' : ''; ?>">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+<!-- Left Sidebar (~240px, Light Grey / Ice-Blue #F4F7F9) -->
+<aside class="left-sidebar" id="leftSidebar">
+  <div class="sidebar-label-head">MAIN NAVIGATION</div>
+  <nav class="sidebar-menu-list">
+    <!-- 1. Dashboard -->
+    <a href="index.php" class="sidebar-link <?php echo ($current_page === 'dashboard') ? 'active' : ''; ?>">
+      <svg class="sidebar-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
       </svg>
-      <span>รายการสินค้าทั้งหมด</span>
+      <span class="sidebar-text">Dashboard</span>
     </a>
 
-    <a href="add_new.php" class="nav-item-btn <?php echo ($current_page === 'add_new') ? 'active' : ''; ?>">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+    <!-- 2. Products / สินค้า -->
+    <a href="menu.php" class="sidebar-link <?php echo ($current_page === 'products' || $current_page === 'menu' || $current_page === 'manage') ? 'active' : ''; ?>">
+      <svg class="sidebar-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
       </svg>
-      <span>เพิ่มสินค้าใหม่</span>
+      <span class="sidebar-text">Products / สินค้า</span>
     </a>
 
-    <a href="manage.php" class="nav-item-btn <?php echo ($current_page === 'manage') ? 'active' : ''; ?>">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+    <!-- 3. Orders / คำสั่งซื้อ -->
+    <a href="orders.php" class="sidebar-link <?php echo ($current_page === 'orders') ? 'active' : ''; ?>">
+      <svg class="sidebar-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
       </svg>
-      <span>จัดการสินค้า</span>
-    </a>
-
-    <a href="orders.php" class="nav-item-btn <?php echo ($current_page === 'orders') ? 'active' : ''; ?>">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-      </svg>
-      <span>รายการคำสั่งซื้อ</span>
+      <span class="sidebar-text">Orders / คำสั่งซื้อ</span>
       <?php if ($nav_pending_count > 0): ?>
-        <span class="nav-badge"><?php echo $nav_pending_count; ?></span>
+        <span class="sidebar-counter-badge"><?php echo $nav_pending_count; ?></span>
       <?php endif; ?>
     </a>
 
-    <a href="ratings.php" class="nav-item-btn <?php echo ($current_page === 'ratings') ? 'active' : ''; ?>">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <!-- 4. Reviews & Ratings / รีวิวสินค้า -->
+    <a href="ratings.php" class="sidebar-link <?php echo ($current_page === 'ratings') ? 'active' : ''; ?>">
+      <svg class="sidebar-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
       </svg>
-      <span>รีวิวสินค้า</span>
+      <span class="sidebar-text">Reviews & Ratings / รีวิวสินค้า</span>
     </a>
 
-    <a href="users.php" class="nav-item-btn <?php echo ($current_page === 'users') ? 'active' : ''; ?>">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+    <!-- 5. Users / ผู้ใช้งาน -->
+    <a href="users.php" class="sidebar-link <?php echo ($current_page === 'users') ? 'active' : ''; ?>">
+      <svg class="sidebar-svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
       </svg>
-      <span>ผู้ใช้งาน</span>
-    </a>
-
-    <a href="index.php" class="nav-item-btn <?php echo ($current_page === 'dashboard') ? 'active' : ''; ?>">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-      </svg>
-      <span>Dashboard</span>
+      <span class="sidebar-text">Users / ผู้ใช้งาน</span>
     </a>
   </nav>
 
-  <form action="menu.php" method="GET" class="navbar-search">
-    <div class="search-input-wrap">
-      <svg class="search-svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-      </svg>
-      <input type="text" name="search" id="navbarSearchInput" placeholder="ค้นหารองเท้าสตั๊ด..." value="<?php echo htmlspecialchars($search_query); ?>">
-      <?php if (!empty($search_query)): ?>
-        <a href="<?php echo basename($_SERVER['PHP_SELF']); ?>" class="clear-btn" title="ล้างการค้นหา">&times;</a>
-      <?php endif; ?>
+  <div class="sidebar-bottom-panel">
+    <div class="sidebar-system-card">
+      <div class="system-title">OnlySport Back Office</div>
+      <div class="system-meta">v2.5 &bull; PHP 8.2 &bull; MySQL 8.0</div>
     </div>
-    <button type="submit" class="search-submit-btn">ค้นหา</button>
-  </form>
-</header>
+  </div>
+</aside>
+
+<script>
+function toggleSidebar() {
+  const sb = document.getElementById('leftSidebar');
+  if (sb) sb.classList.toggle('show');
+}
+</script>

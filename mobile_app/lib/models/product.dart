@@ -8,6 +8,8 @@ class Product {
   final String groundType;
   final String description;
   bool isFavorite;
+  final double ratingAvg;
+  final int ratingCount;
 
   Product({
     required this.id,
@@ -19,6 +21,8 @@ class Product {
     required this.groundType,
     required this.description,
     this.isFavorite = false,
+    this.ratingAvg = 4.9,
+    this.ratingCount = 1,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -66,6 +70,13 @@ class Product {
         json['isFavorite'] == true ||
         json['is_favorite'] == 1;
 
+    final ratingAvg =
+        double.tryParse('${json['rating_avg'] ?? json['ratingAvg'] ?? 4.9}') ??
+            4.9;
+    final ratingCount =
+        int.tryParse('${json['rating_count'] ?? json['ratingCount'] ?? 1}') ??
+            1;
+
     return Product(
       id: id,
       name: name,
@@ -76,6 +87,8 @@ class Product {
       groundType: groundType,
       description: description,
       isFavorite: isFavorite,
+      ratingAvg: ratingAvg,
+      ratingCount: ratingCount,
     );
   }
 

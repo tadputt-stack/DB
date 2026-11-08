@@ -131,9 +131,9 @@ class _MainScreenState extends State<MainScreen> {
               label: 'ตะกร้า',
             ),
             const BottomNavigationBarItem(
-              icon: Icon(Icons.grid_view_outlined),
-              activeIcon: Icon(Icons.grid_view),
-              label: 'เมนู',
+              icon: Icon(Icons.star_outline_rounded),
+              activeIcon: Icon(Icons.star_rounded),
+              label: 'รีวิวสินค้า',
             ),
             const BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),

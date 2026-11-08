@@ -57,8 +57,9 @@ $total_rows = ($result) ? $result->num_rows : 0;
 </head>
 <body>
 
+<?php include "navbar.php"; ?>
+
 <div class="container">
-  <?php include "navbar.php"; ?>
 
   <div class="card" style="margin-top: 24px;">
     <div class="card-header">
